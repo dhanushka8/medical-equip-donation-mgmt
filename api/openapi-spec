@@ -1,0 +1,1152 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "HospitalEquipment",
+        "version": "1",
+        "description": ""
+    },
+    "paths": {
+        "/hospitals": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/hospital"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": [
+                        ]
+                    }
+                ],
+                "operationId": "getAllHospitals",
+                "description": ""
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/hospital"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/hospitals/{hospital_id}/required_instruments": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/required_instruments_get_byhospital"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "operationId": "getRequiredIntrumentsForHospital",
+                "description": ""
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/required_instruments_add"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "operationId": "updateRequiredInstrumentsForHospital",
+                "description": ""
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/required_instruments_add"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "operationId": "addRequiredInstrumentForHospital",
+                "description": ""
+            },
+            "parameters": [
+                {
+                    "name": "hospital_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/hospitals/{hospital_id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/hospital"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": [
+                        ]
+                    }
+                ],
+                "operationId": "getHospitalDetails",
+                "description": ""
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/hospital"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sucess"
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "hospital_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/required_instruments": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "hospital_id",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query"
+                    },
+                    {
+                        "name": "urgency",
+                        "description": "",
+                        "schema": {
+                            "enum": [
+                                "VeryUrgent",
+                                "Urgent",
+                                "Regular"
+                            ],
+                            "type": "string"
+                        },
+                        "in": "query"
+                    },
+                    {
+                        "name": "district",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query"
+                    },
+                    {
+                        "name": "instrument_cat_id",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/required_instruments_get_all"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getAllRequiredInstruments",
+                "description": ""
+            }
+        },
+        "/hospitals/{hospital_id}/coordinators": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/coordinator"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getCoordinators"
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/coordinator"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "AddCoordinators"
+            },
+            "parameters": [
+                {
+                    "name": "hospital_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/hospitals/{hospital_id}/coordinators/{coordinator_id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/coordinator"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getCoordinator"
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/coordinator"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "updateCoordinator"
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/coordinator"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "addCoordinator"
+            },
+            "parameters": [
+                {
+                    "name": "hospital_id",
+                    "in": "path",
+                    "required": true
+                },
+                {
+                    "name": "coordinator_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/hospitals/{hospital_id}/donated_instruments": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/donated_instruments_get"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "operationId": "getDonatedIntrumentsForHospital",
+                "description": ""
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donated_instruments_add"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "updateDonatedInstrumentsForHospital",
+                "description": ""
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donated_instruments_add"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "addDonatedInstrumentsForHospital",
+                "description": ""
+            },
+            "parameters": [
+                {
+                    "name": "hospital_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/donor_organizations": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/donor_organization"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getAllDonorOrganizations",
+                "description": ""
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donor_organization"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/donor_organizations/{donor_organization_id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "donor_organization_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/donor_organization"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getDonorOrganization"
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/donor_organization"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "parameters": [
+                    {
+                        "name": "donor_organization_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "updateDonorOrganization"
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/donor_organization"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "parameters": [
+                    {
+                        "name": "donor_organization_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "addDonorOrganization"
+            }
+        },
+        "/donor_organizations/{donor_organization_id}/donated_instruments": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/donated_instruments_get"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getDonatedInstrumentsForDonorOrg"
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donated_instruments_add"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "updateDonatedInstruments"
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donated_instruments_add"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "addDonatedInstrumentsForDonorOrg"
+            },
+            "parameters": [
+                {
+                    "name": "donor_organization_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/donor_organizations/{donor_organization_id}/donor_contacts": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/donor_contact"
+                                    }
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                },
+                "operationId": "getDonorContactsForDonorOrg"
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donor_contact"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "updateDonorContactsForDonorOrg"
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/donor_contact"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "addDonorContactsForDonorOrg"
+            },
+            "parameters": [
+                {
+                    "name": "donor_organization_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        },
+        "/required_instruments/{instrument_cat_id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/required_instruments_get_byinstrcategory"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "operationId": "getRequiredInstrumentByID",
+                "description": ""
+            },
+            "parameters": [
+                {
+                    "name": "instrument_cat_id",
+                    "in": "path",
+                    "required": true
+                }
+            ]
+        }
+    },
+    "components": {
+        "schemas": {
+            "hospital": {
+                "required": [
+                    "hospital_id",
+                    "name",
+                    "address"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "$ref": "#/components/schemas/address"
+                    },
+                    "coordinator": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/coordinator"
+                        }
+                    },
+                    "hospital_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "address": {
+                "required": [
+                    "line1",
+                    "name",
+                    "city"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "line1": {
+                        "type": "string"
+                    },
+                    "line2": {
+                        "type": "string"
+                    },
+                    "line3": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "postalcode": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    }
+                }
+            },
+            "coordinator": {
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "coordinator_id"
+                ],
+                "properties": {
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "designation": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "$ref": "#/components/schemas/address",
+                        "description": ""
+                    },
+                    "coordinator_id": {
+                        "description": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "required_instruments_get_byhospital": {
+                "properties": {
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "urgency": {
+                        "enum": [
+                            "VeryUrgent",
+                            "Urgent",
+                            "Regular"
+                        ],
+                        "type": "string"
+                    },
+                    "updated_date": {
+                        "type": "string"
+                    },
+                    "instrument_category": {
+                        "$ref": "#/components/schemas/instrument_category"
+                    }
+                }
+            },
+            "required_instruments_get_all": {
+                "properties": {
+                    "instrument_name": {
+                        "type": "integer"
+                    },
+                    "requirements": {
+                        "$ref": "#/components/schemas/required_instruments_get_byinstrcategory"
+                    },
+                    "instrument_category_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "donor_contact": {
+                "required": [
+                    "donor_organization_id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "donor_contact_id"
+                ],
+                "properties": {
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "designation": {
+                        "type": "string"
+                    },
+                    "donor_organization_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "donor_contact_id": {
+                        "description": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "donor_organization": {
+                "required": [
+                    "address",
+                    "name",
+                    "donor_organization_id"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "$ref": "#/components/schemas/address"
+                    },
+                    "contacts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/donor_contact"
+                        }
+                    },
+                    "donor_organization_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "donated_instruments_add": {
+                "required": [
+                    "instruments_category_id",
+                    "quantity",
+                    "donor_organization_id",
+                    "donated_date",
+                    "instruments"
+                ],
+                "properties": {
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "donor_contact_id": {
+                        "type": "string"
+                    },
+                    "donor_organization_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "hospital_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "donated_date": {
+                        "type": "string"
+                    },
+                    "instruments": {
+                        "description": "",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/instrument"
+                        }
+                    },
+                    "instruments_category_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "donated_instruments_get": {
+                "required": [
+                    "instrument_category",
+                    "quantity",
+                    "donated_date",
+                    "donor_organization_id"
+                ],
+                "properties": {
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "donated_date": {
+                        "type": "string"
+                    },
+                    "donor_contact_id": {
+                        "type": "string"
+                    },
+                    "donor_organization_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "hospital_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "instrument_category": {
+                        "$ref": "#/components/schemas/instrument_category"
+                    }
+                }
+            },
+            "required_instruments_add": {
+                "required": [
+                    "urgency",
+                    "updated_date",
+                    "quantity",
+                    "instrument_category_id",
+                    "hospital_id"
+                ],
+                "properties": {
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "urgency": {
+                        "enum": [
+                            "VeryUrgent",
+                            "Urgent",
+                            "Regular"
+                        ],
+                        "type": "string"
+                    },
+                    "updated_date": {
+                        "type": "string"
+                    },
+                    "hospital_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "instrument_category_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "instrument": {
+                "description": "",
+                "required": [
+                    "category"
+                ],
+                "type": "object",
+                "properties": {
+                    "serial_number": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/instrument_category",
+                        "description": ""
+                    },
+                    "expiry_date": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "warranty": {
+                        "description": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "instrument_category": {
+                "required": [
+                    "model",
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "model": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "brand": {
+                        "description": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "committed_instruments_add": {
+                "required": [
+                    "instruments_category_id",
+                    "quantity",
+                    "donor_organization_id",
+                    "expected_delivery_date"
+                ],
+                "properties": {
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "donor_contact_id": {
+                        "type": "string"
+                    },
+                    "donor_organization_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "hospital_id": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "expected_delivery_date": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "description": "",
+                        "enum": [
+                            "Committed",
+                            "Purchased",
+                            "Dispatch",
+                            "Delivered",
+                            "Received"
+                        ],
+                        "type": "string"
+                    },
+                    "actual_delivery_date": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "delivery_tracking": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "comments": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "instruments_category_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required_instruments_get_byinstrcategory": {
+                "properties": {
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "urgency": {
+                        "enum": [
+                            "VeryUrgent",
+                            "Urgent",
+                            "Regular"
+                        ],
+                        "type": "string"
+                    },
+                    "updated_date": {
+                        "type": "string"
+                    },
+                    "hospital_id": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        }
+    }
+}
