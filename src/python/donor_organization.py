@@ -5,9 +5,9 @@ import pymysql
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-endpoint = 'mysqldb-dev-1.cvseqwgjxncy.ap-southeast-1.rds.amazonaws.com'
-username = 'admin'
-password = 'nhep4SL!'
+endpoint = 'xxxx'
+username = 'xxxx'
+password = 'xxxx'
 database_name = 'covid_hospital_equipments'
 
 connection = pymysql.connect(host=endpoint, user=username,passwd=password, db=database_name)
