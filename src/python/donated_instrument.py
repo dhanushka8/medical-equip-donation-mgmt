@@ -15,38 +15,34 @@ connection = pymysql.connect(host=endpoint, user=username,passwd=password, db=da
 def lambda_handler(event, context):
     #logger.info("Request: %s", event)
     
-    hospitalId= event['pathParameters']['hospitalId']
+    hospitalId = event['pathParameters']['hospitalId']
     operationName = event['requestContext']['operationName']
     
     if operationName == 'getDonatedIntrumentsForHospital':
-        response_body = getDonatedIntrumentsForHospital (hospitalId, event)
-        response_code = 200
+        return getDonatedIntrumentsForHospital (hospitalId, event)
     elif operationName == 'addDonatedInstrumentsForHospital':
-        response_body = addDonatedInstrumentsForHospital (hospitalId, event)
-        response_code = 200
+        return addDonatedInstrumentsForHospital (hospitalId, event)
     elif operationName == 'updateDonatedInstrumentsForHospital':
-        response_body = updateDonatedInstrumentsForHospital (hospitalId, event)
-        response_code = 200
+        return updateDonatedInstrumentsForHospital (hospitalId, event)
     else:
-        response_body = json.dumps('Operation Unknown')
-        response_code = 200
-        
-    
-    return {
-        'statusCode': response_code,
-        'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
-        'body': response_body
-    }
+        return {
+            'statusCode': 501,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': json.dumps('Operation Unknown')
+        }
 
+
+#Get Donated Instruments
 def getDonatedIntrumentsForHospital (hospitalId, event):
     cursor = connection.cursor()
     cursor.execute('SELECT cat.code, cat.name, don.qty, don.donatedDate, don.status, don.comments, hos.hospitalName, org.orgName FROM donated_instrument AS don LEFT JOIN instrument_category AS cat ON don.instrumentCode=cat.code LEFT JOIN hospital AS hos ON don.hospitalId=hos.hid LEFT JOIN donor_organization AS org ON don.donorOrgId=org.doId WHERE don.hospitalId='+hospitalId)
    
     rows = cursor.fetchall()
+    cursor.close()
     
     donationList=[]
     for row in rows:
@@ -54,11 +50,47 @@ def getDonatedIntrumentsForHospital (hospitalId, event):
         'status': row[4], 'comments': row[5], 'hospital': row[6], 'donorOrg': row[7]
         }
         donationList.append(donation)
-    return json.dumps(donationList, indent=4, default=str)
     
     
-def addDonatedIntrumentsForHospital (hospitalId, event):
-    return json.dumps('Hello from Lambda - addDonatedIntrumentsForHospital!')
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps(donationList, indent=4, default=str)
+    }
+    
+    
+# Add Donated Instruments
+def addDonatedInstrumentsForHospital (hospitalId, event):
+    
+    cBody = json.loads(event['body'])
+    logger.info("Request Body: %s", cBody)
+    
+    try:
+        cursor = connection.cursor()
+        #add_donated_instruments(IN hospitalId INT, IN instrumentCode VARCHAR(45), IN donateQty INT,IN donatedDate TIMESTAMP, IN status VARCHAR(45), IN comments VARCHAR(45), IN donorOrgId INT, IN donorUserId INT)
+        args = [hospitalId, cBody['instrumentCode'], cBody['quantity'], cBody['donatedDate'], cBody['status'], cBody['comments'], cBody['donorOrganizationId'], cBody['donorUserId']]
+        cursor.callproc('add_donated_instruments', args)
+        connection.commit()
+    except Exception as e:
+        logger.error("Error: %s", e)
+        connection.rollback()
+        raise e
+    finally:
+        cursor.close()
+
+    return {
+        'statusCode': 201,
+        'headers': {
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps(cBody)
+    }   
     
 def updateDonatedInstrumentsForHospital (hospitalId, event):
     return json.dumps('Hello from Lambda - updateDonatedInstrumentsForHospital!')
