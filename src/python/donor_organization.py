@@ -50,6 +50,7 @@ def getAllDonorOrgs (event):
     cursor.execute('SELECT org.doId, org.orgName, org.phone, org.email, ad.addressId, ad.name, ad.street, ad.city, ad.district, ad.state, ad.zipcode, ad.country, usr.uid, usr.firstName, usr.lastName, usr.emailAddress FROM donor_organization AS org LEFT JOIN address AS ad ON org.addressId=ad.addressId LEFT JOIN user AS usr ON org.primary_contactId=usr.uid')
    
     rows = cursor.fetchall()
+    cursor.close()
     return constructGetResponse (rows)
      
 # Get One Donor Org
@@ -58,6 +59,7 @@ def getDonorOrg (donororgid, event):
     cursor.execute('SELECT org.doId, org.orgName, org.phone, org.email, ad.addressId, ad.name, ad.street, ad.city, ad.district, ad.state, ad.zipcode, ad.country, usr.uid, usr.firstName, usr.lastName, usr.emailAddress FROM donor_organization AS org LEFT JOIN address AS ad ON org.addressId=ad.addressId LEFT JOIN user AS usr ON org.primary_contactId=usr.uid WHERE doId='+donororgid)
    
     rows = cursor.fetchall()
+    cursor.close()
     return constructGetResponse (rows)
 
 #Construct the Get response
@@ -69,5 +71,6 @@ def constructGetResponse (rows):
         'primary_contact': { 'contactId': row[12], 'firstName': row[13], 'lastName': row[14], 'email': row[15] }
         }
         orgList.append(org)
+    
     return json.dumps(orgList, indent=4, default=str)
     
