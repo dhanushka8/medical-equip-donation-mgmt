@@ -1,16 +1,10 @@
 import json
 import logging
 import pymysql
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-endpoint = 'xxxx'
-username = 'xxxx'
-password = 'xxxx'
-database_name = 'covid_hospital_equipments'
-
-connection = pymysql.connect(host=endpoint, user=username,passwd=password, db=database_name)
 
 def lambda_handler(event, context):
     #logger.info("Request: %s", event)
@@ -21,48 +15,83 @@ def lambda_handler(event, context):
 
     if role == 'ADMIN':
         if operationName == 'getAllDonorOrganizations':
-            response_body = getAllDonorOrgs (event)
-            response_code = 200
+            return getAllDonorOrgs (event)
         elif operationName == 'getDonorOrganization':
-            donororgid = event['pathParameters']['donorOrganizationId']
-            response_body = getDonorOrg (donororgid, event)
-            response_code = 200
+            return getDonorOrg (event)
+        elif operationName == 'addDonorOrganizations':
+            return addDonorOrganizations(event)
+        elif operationName == 'updateDonorOrganization':
+            return updateDonorOrganization(event)
         else:
-            response_body = json.dumps('Operation Unknown')
-            response_code = 200
+            return {
+                'statusCode': 501,
+                'headers': retrieveHeaders (),
+                'body': json.dumps('Operation Unknown')
+            }
     else:
-        response_code = 403
-        response_body = json.dumps('Not Authorized')
+        return {
+            'statusCode': 403,
+            'headers': retrieveHeaders (),
+            'body': json.dumps('Not Authorized')
+        }
 
-    return {
-        'statusCode': response_code,
-        'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
-        'body': response_body
-    }
+
+# Get DB Connection
+def getDBConnection(event):
+    env = event['requestContext']['stage']
+    #logger.info("Stage: %s", env)
+    
+    dbHost = os.environ[env + '_db_host']
+    dbName = os.environ[env + '_db_name']
+    dbUser = os.environ[env + '_db_user']
+    dbPwd= os.environ[env + '_db_pwd']
+    #logger.info("DB Host: %s", dbHost)
+    
+    return pymysql.connect(host=dbHost, db=dbName, user=dbUser, passwd=dbPwd)
+
+# Common HTTP Header
+def retrieveHeaders ():
+   return {
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST,PUT,GET'
+   }
 
 # Get All Donor Organization Details
 def getAllDonorOrgs (event):
+    connection = getDBConnection(event)
     cursor = connection.cursor()
+    
     cursor.execute('SELECT org.doId, org.orgName, org.phone, org.email, ad.addressId, ad.name, ad.street, ad.city, ad.district, ad.state, ad.zipcode, ad.country, usr.uid, usr.firstName, usr.lastName, usr.emailAddress FROM donor_organization AS org LEFT JOIN address AS ad ON org.addressId=ad.addressId LEFT JOIN user AS usr ON org.primary_contactId=usr.uid')
-   
     rows = cursor.fetchall()
+    
     cursor.close()
-    return constructGetResponse (rows)
+    connection.close()
+    return {
+        'statusCode': 200,
+        'headers': retrieveHeaders (),
+        'body': constructGetResponse (rows)
+    }
      
 # Get One Donor Org
-def getDonorOrg (donororgid, event): 
+def getDonorOrg (event): 
+    donororgid = event['pathParameters']['donorOrganizationId']
+    connection = getDBConnection(event)
     cursor = connection.cursor()
+    
     cursor.execute('SELECT org.doId, org.orgName, org.phone, org.email, ad.addressId, ad.name, ad.street, ad.city, ad.district, ad.state, ad.zipcode, ad.country, usr.uid, usr.firstName, usr.lastName, usr.emailAddress FROM donor_organization AS org LEFT JOIN address AS ad ON org.addressId=ad.addressId LEFT JOIN user AS usr ON org.primary_contactId=usr.uid WHERE doId='+donororgid)
-   
     rows = cursor.fetchall()
+    
     cursor.close()
-    return constructGetResponse (rows)
+    connection.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': retrieveHeaders (),
+        'body': constructGetResponse (rows)
+    }
 
-#Construct the Get response
+#Construct the Get Response
 def constructGetResponse (rows):
     orgList=[]
     for row in rows:
@@ -74,3 +103,20 @@ def constructGetResponse (rows):
     
     return json.dumps(orgList, indent=4, default=str)
     
+
+#Add Donor Org
+def addDonorOrganizations(event):
+    return {
+        'statusCode': 201,
+        'headers': retrieveHeaders(),
+        'body': json.dumps(event)
+    }
+    
+
+#Update Donor Org
+def updateDonorOrganization(event):
+    return {
+        'statusCode': 200,
+        'headers': retrieveHeaders(),
+        'body': json.dumps(event)
+    }
