@@ -7,13 +7,15 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    print('event values', event,)
-    print('Context values', context,)
+    #print('event values', event,)
+    #print('Context values', context,)
     #print('hospitalId: >>', event['pathParameters']['hospitalId'])
     #print('coordinatorId: >>', event['pathParameters']['coordinatorId'])
-    print('method: ', event['httpMethod'])
+    #print('method: ', event['httpMethod'])
     
     operationName = event['requestContext']['operationName']
+    #updateCoordinator
+    logger.info('operationName: %s'+ operationName)
     
     if operationName == 'getCoordinators':
         return getCoordinators(event)
@@ -21,6 +23,8 @@ def lambda_handler(event, context):
         return getCoordinatorById(event)
     elif operationName == 'addCoordinators':
         return createCoordinatorById(event)
+    elif operationName == 'updateCoordinator':
+        return updateCoordinatorById(event)
     else:
         return {
             'statusCode': 501,
@@ -170,3 +174,39 @@ def createCoordinatorById(event):
     finally:
         cursor.close()
         connection.close()
+
+def updateCoordinatorById(event):
+    #update_hospital_coordinator
+    logger.info('[Update Coordinator] hospitalId:  %s', event['pathParameters']['hospitalId'])
+    logger.info('[Update Coordinator] coordinatorId: %s', event['pathParameters']['coordinatorId'])
+    cBody= json.loads(event['body'])
+    coordinatorId = event['pathParameters']['coordinatorId']
+    #hospitalId= event['pathParameters']['hospitalId'];
+    cAddress = getValue(cBody,'address')
+    procArgs=[coordinatorId,getValue(cBody,'firstName'), getValue(cBody,'lastName') , getValue(cBody,'phone'), getValue(cBody,'email'), getValue(cBody,'designation'),  getValue(cBody,'secondContactNumber'), getValue(cBody,'salutation')
+            ,getValue(cAddress,'addressType'), getValue(cAddress,'name'), getValue(cAddress,'street'), getValue(cAddress,'city'), getValue(cAddress,'district'), getValue(cAddress,'state'), getValue(cAddress,'zipcode'), getValue(cAddress,'country')]
+    logger.info('[Update Coordinator] Update hospital coordinator body procArgs:  %s', procArgs)
+    try:
+        connection = getDBConnection(event)
+        cursor = connection.cursor()
+        cursor.callproc('update_hospital_coordinator', procArgs)
+        connection.commit()
+        logger.info("[Update Coordinator] Coodinator successfully updated. Id: %s", coordinatorId)
+        return {
+            'statusCode': 200,
+            'headers': retrieveHeaders (),
+            'body': json.dumps(cBody)
+        }
+    except Exception as e:
+        logger.error("[Update Coordinator] Error occured while updating coordinator: %s", e)
+        returnError = {'errorMessage': str(e), 'errorType': 'OperationalError'}
+        connection.rollback()
+        return {
+            'statusCode': 500,
+            'headers': retrieveHeaders(),
+            'body': json.dumps(returnError)
+        }
+    finally:
+        cursor.close()
+        connection.close()
+    
