@@ -22,7 +22,7 @@ def lambda_handler(event, context):
     elif operationName == 'getCoordinator':
         return getCoordinatorById(event)
     elif operationName == 'addCoordinators':
-        return createCoordinatorById(event)
+        return createCoordinators(event)
     elif operationName == 'updateCoordinator':
         return updateCoordinatorById(event)
     else:
@@ -65,16 +65,17 @@ def getCoordinators(event):
     usersList=[]
     
     for uRow in userRows:
-        cursor.execute('SELECT a.* FROM address a WHERE a.userId='+str(uRow[0]))
+        cursor.execute('SELECT a.* FROM address a WHERE a.userId='+str(uRow[0]) + ' AND addressId='+str(uRow[17]) )
         addressRows = cursor.fetchall()
         addressList = []
-        
+        address={}
+        #only the primary address is considered here
         for aRow in addressRows:
             address={'addressId': aRow[0], 'name': aRow[2], 'street': aRow[3], 'city' : aRow[4], 'district': aRow[5], 'state': aRow[6], 'zipcode': aRow[7], 'country': aRow[8]}
-            addressList.append(address)
+            #addressList.append(address)
         
         user={'coordinatorId': uRow[0], 'firstName' : uRow[1], 'lastName': uRow[2], 'phone':uRow[3], 'email': uRow[6],
-            'designation': uRow[13], 'secondContact': uRow[14] , 'address': addressList}
+            'designation': uRow[13], 'secondContact': uRow[14] , 'address': address}
         usersList.append(user)
     
     cursor.close()
@@ -103,13 +104,14 @@ def getCoordinatorById(event):
         cursor.execute('SELECT * FROM address WHERE userId='+str(uRow[0]))
         addressRows = cursor.fetchall()
         addressList = []
-        
+        address ={}
+        #primary address is considered
         for aRow in addressRows:
             address={'addressId': aRow[0], 'locationName': aRow[1], 'street': aRow[2], 'city' : aRow[3], 'districtName': aRow[4], 'state': aRow[5],'country': aRow[6], 'zipCode' : aRow[7]}
             addressList.append(address)
         
         user={'coordinatorId': uRow[0], 'firstName' : uRow[1], 'lastName': uRow[2], 'phone':uRow[3], 'email': uRow[6],
-            'designation': uRow[13], 'secondContact': uRow[14] , 'address': addressList}
+            'designation': uRow[13], 'secondContact': uRow[14] , 'address': address }
         #usersList.append(user)
     
     cursor.close()
@@ -126,46 +128,55 @@ def getValue(obj,val):
     return obj.get(val, None)
     
 #Create Coordinator
-def createCoordinatorById(event):
-    print('hospitalId: >>', event['pathParameters']['hospitalId'])
-    print('coordinatorId: >>', event['pathParameters']['coordinatorId'])
-    cBody= json.loads(event['body'])
+def createCoordinators(event):
+    logger.info('[createCoordinatorById] hospitalId: %s', event['pathParameters']['hospitalId'])
+    #print('coordinatorId: >>', event['pathParameters']['coordinatorId'])
+    #cBody= json.loads(event['body'])
+    cList= json.loads(event['body'])
+    logger.info('[createCoordinators] Request Body: %s', cList)
     hospitalId= event['pathParameters']['hospitalId'];
-    print('req body: ', cBody)
+    
     coordInsertquery = 'INSERT INTO user (firstName, lastName,contactNumber,userName,password,emailAddress,userRole,image,imageUrl,status,designation, secondContactNumber,salutation) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);'
     hspContctInsertquery = 'INSERT INTO hospital_contact (hospitalId, userId) VALUES (%s,%s);'
-    
+    updateUserAddressQry = 'UPDATE user SET addressId=%s WHERE uid=%s;'
     connection = getDBConnection(event)
     cursor = connection.cursor()
     try:
-        cursor.execute(coordInsertquery, (getValue(cBody,'firstName'), getValue(cBody,'lastName') , getValue(cBody,'phone'), None, None, getValue(cBody,'email'), 2, None, None, 'ACTIVE', getValue(cBody,'designation'),  getValue(cBody,'secondContactNumber'), getValue(cBody,'salutation') ))
-        userPkey = cursor.lastrowid
-        cursor.execute(hspContctInsertquery, ( hospitalId,  hospitalId))
-        hspContactId = cursor.lastrowid
-        cAddress = getValue(cBody,'address')
-        if cAddress:
-            #cAddress= json.loads(event['body'])
-            print('addres not null ', cAddress)
-            cAddrsInsertQry = 'INSERT INTO address (addressType,name,street,city,district,state,zipcode,country,userId,hospitalId) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);'
-            cursor.execute(cAddrsInsertQry, ( getValue(cAddress,'addressType'), getValue(cAddress,'name'), getValue(cAddress,'street'), getValue(cAddress,'city'), getValue(cAddress,'district'), getValue(cAddress,'state'), getValue(cAddress,'zipcode'), getValue(cAddress,'country'), userPkey, hospitalId))
-            adrsId = cursor.lastrowid
-            cAddress['addressId'] = adrsId
-            cBody['address'] = cAddress
-        cBody['uid'] = userPkey 
-        cBody['hospitalContactId'] = hspContactId 
-        print('user added id: ', userPkey)
+        for cBody in cList:
+            cAddress = getValue(cBody,'address')
+            if cAddress is None:
+                logger.warn('[createCoordinatorById] Address field is missing for coordinator: %s',getValue(cBody,'firstName'))
+                connection.rollback()
+                return {
+                        'statusCode': 400,
+                        'headers': retrieveHeaders (),
+                        'body': json.dumps({'errorMessage': 'Address Field is missing for coordinator '+  getValue(cBody,'firstName'), 'errorType': 'OperationalError'})
+                        }
+                break
+            cursor.execute(coordInsertquery, (getValue(cBody,'firstName'), getValue(cBody,'lastName') , getValue(cBody,'phone'), None, None, getValue(cBody,'email'), 2, None, None, 'ACTIVE', getValue(cBody,'designation'),  getValue(cBody,'secondContactNumber'), getValue(cBody,'salutation') ))
+            userPkey = cursor.lastrowid
+            cursor.execute(hspContctInsertquery, ( hospitalId,  userPkey))
+            hspContactId = cursor.lastrowid
+            if cAddress:
+                cAddrsInsertQry = 'INSERT INTO address (addressType,name,street,city,district,state,zipcode,country,userId,hospitalId) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);'
+                cursor.execute(cAddrsInsertQry, ( getValue(cAddress,'addressType'), getValue(cAddress,'name'), getValue(cAddress,'street'), getValue(cAddress,'city'), getValue(cAddress,'district'), getValue(cAddress,'state'), getValue(cAddress,'zipcode'), getValue(cAddress,'country'), userPkey, hospitalId))
+                adrsId = cursor.lastrowid
+                cursor.execute(updateUserAddressQry, (adrsId,userPkey) )
+                cAddress['addressId'] = adrsId
+                cBody['address'] = cAddress
+                logger.info('[createCoordinatorById] coordinator inserted. UserId: %s, hospitalContact: %s, addressId: %s', userPkey,hspContactId,adrsId)
+            cBody['uid'] = userPkey 
+            cBody['hospitalContactId'] = hspContactId
         connection.commit()
-        
         return {
             'statusCode': 201,
             'headers': retrieveHeaders (),
-            'body': json.dumps(cBody)
-        }
+            'body': json.dumps(cList)
+            }
     except Exception as e:
-        print('Error Occured while saving: ',e)
+        logger.error('[createCoordinatorById] Error Occured while saving coordinator: %s',e)
         returnError = {'errorMessage': str(e), 'errorType': 'OperationalError'}
         connection.rollback()
-        
         return {
             'statusCode': 500,
             'headers': retrieveHeaders (),
@@ -174,6 +185,7 @@ def createCoordinatorById(event):
     finally:
         cursor.close()
         connection.close()
+    
 
 def updateCoordinatorById(event):
     #update_hospital_coordinator
